@@ -77,68 +77,64 @@ const isFullGrid = (grid) => {
 }
 
 const sudokuCreate = (grid) => {
-    let unassigned_pos = {
+    const unassignedPos = {
         row: -1,
         col: -1
-    }
+    };
 
-    if (!findUnassignedPos(grid, unassigned_pos)) return true;
+    if (!findUnassignedPos(grid, unassignedPos)) return true;
 
-    let number_list = shuffleArray([...CONSTANT.NUMBERS]);
+    const numberList = shuffleArray([...CONSTANT.NUMBERS]);
+    const { row, col } = unassignedPos;
 
-    let row = unassigned_pos.row;
-    let col = unassigned_pos.col;
-
-    number_list.forEach((num, i) => {
+    for (const num of numberList) {
         if (isSafe(grid, row, col, num)) {
             grid[row][col] = num;
-
-            if (isFullGrid(grid)) {
-                return true;
-            } else {
-                if (sudokuCreate(grid)) {
-                    return true;
-                }
-            }
-
+            if (sudokuCreate(grid)) return true;
             grid[row][col] = CONSTANT.UNASSIGNED;
         }
-    });
+    }
 
-    return isFullGrid(grid);
+    return false;
 }
 
 const sudokuCheck = (grid) => {
-    let unassigned_pos = {
-        row: -1,
-        col: -1
+    if (!isFullGrid(grid)) return false;
+
+    const target = new Set(CONSTANT.NUMBERS);
+    const hasEveryNumber = (values) =>
+        values.length === CONSTANT.GRID_SIZE &&
+        new Set(values).size === CONSTANT.GRID_SIZE &&
+        values.every((value) => target.has(value));
+
+    for (let index = 0; index < CONSTANT.GRID_SIZE; index++) {
+        const row = grid[index];
+        const column = grid.map((currentRow) => currentRow[index]);
+
+        if (!hasEveryNumber(row) || !hasEveryNumber(column)) return false;
     }
 
-    if (!findUnassignedPos(grid, unassigned_pos)) return true;
-
-    grid.forEach((row, i) => {
-        row.forEach((num, j) => {
-            if (isSafe(grid, i, j, num)) {
-                if (isFullGrid(grid)) {
-                    return true;
-                } else {
-                    if (sudokuCreate(grid)) {
-                        return true;
-                    }
+    for (let boxRow = 0; boxRow < CONSTANT.GRID_SIZE; boxRow += CONSTANT.BOX_SIZE) {
+        for (let boxCol = 0; boxCol < CONSTANT.GRID_SIZE; boxCol += CONSTANT.BOX_SIZE) {
+            const box = [];
+            for (let row = 0; row < CONSTANT.BOX_SIZE; row++) {
+                for (let col = 0; col < CONSTANT.BOX_SIZE; col++) {
+                    box.push(grid[boxRow + row][boxCol + col]);
                 }
             }
-        })
-    })
+            if (!hasEveryNumber(box)) return false;
+        }
+    }
 
-    return isFullGrid(grid);
+    return true;
 }
 
 const rand = () => Math.floor(Math.random() * CONSTANT.GRID_SIZE);
 
 const removeCells = (grid, level) => {
-    let res = [...grid];
-    let attemps = level;
-    while (attemps > 0) {
+    const res = grid.map((row) => [...row]);
+    let attempts = level;
+    while (attempts > 0) {
         let row = rand();
         let col = rand();
         while (res[row][col] === 0) {
@@ -146,7 +142,7 @@ const removeCells = (grid, level) => {
             col = rand();
         }
         res[row][col] = CONSTANT.UNASSIGNED;
-        attemps--;
+        attempts--;
     }
     return res;
 }

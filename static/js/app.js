@@ -1,243 +1,200 @@
-document.querySelector("#dark-mode-toggle").addEventListener("click", () => {
-	document.body.classList.toggle("dark");
-	const isDarkMode = document.body.classList.contains("dark");
-	localStorage.setItem("darkmode", isDarkMode);
+const startScreen = document.querySelector("#start-screen");
+const gameScreen = document.querySelector("#game-screen");
+const pauseScreen = document.querySelector("#pause-screen");
+const resultScreen = document.querySelector("#result-screen");
+const cells = [...document.querySelectorAll(".main-grid-cell")];
+const nameInput = document.querySelector("#input-name");
+const numberInputs = [...document.querySelectorAll(".number")];
+const playerName = document.querySelector("#player-name");
+const gameLevel = document.querySelector("#game-level");
+const gameTime = document.querySelector("#game-time");
+const resultTime = document.querySelector("#result-time");
+const progressValue = document.querySelector("#progress-value");
+const progressBar = document.querySelector("#progress-bar");
 
-	document
-		.querySelector('meta[name="theme-color"')
-		.setAttribute("content", isDarkMode ? "#1a1a27" : "#fff");
-});
-
-const start_screen = document.querySelector("#start-screen");
-const game_screen = document.querySelector("#game-screen");
-const pause_screen = document.querySelector("#pause-screen");
-const result_screen = document.querySelector("#result-screen");
-
-const cells = document.querySelectorAll(".main-grid-cell");
-
-const name_input = document.querySelector("#input-name");
-
-const number_inputs = document.querySelectorAll(".number");
-
-const player_name = document.querySelector("#player-name");
-const game_level = document.querySelector("#game-level");
-const game_time = document.querySelector("#game-time");
-
-const result_time = document.querySelector("#result-time");
-
-let level_index = 0;
-let level = CONSTANT.LEVEL[level_index];
-
+let levelIndex = 0;
+let level = CONSTANT.LEVEL[levelIndex];
 let timer = null;
-let pause = false;
+let paused = false;
 let seconds = 0;
+let sudoku = null;
+let playerGrid = null;
+let selectedCell = -1;
 
-let su = undefined;
-let su_answer = undefined;
-
-let selected_cell = -1;
-
-//classlist for array with selected cells
-
-let selected_cells = [];
-
-const isCellFilled = (cell) => cell.innerHTML !== "";
-
-const isCellSelected = (cell) => selected_cells.includes(cell);
-
-const selectCell = (cell) => {
-	if (!isCellSelected(cell)) {
-		selected_cells.push(cell);
-		cell.classList.add("selected");
-	}
-};
-
-const getGameInfo = () => JSON.parse(localStorage.getItem("game"));
-
-const initGameGrid = () => {
-	let index = 0;
-
-	for (let i = 0; i < Math.pow(CONSTANT.GRID_SIZE, 2); i++) {
-		let row = Math.floor(i / CONSTANT.GRID_SIZE);
-		let col = i % CONSTANT.GRID_SIZE;
-		if (row === 2 || row === 5) cells[index].style.marginBottom = "10px";
-		if (col === 2 || col === 5) cells[index].style.marginRight = "10px";
-
-		index++;
-	}
+const isCellFilled = (cell) => cell.classList.contains("filled");
+const getGameInfo = () => {
+	const savedGame = localStorage.getItem("game");
+	return savedGame ? JSON.parse(savedGame) : null;
 };
 
 const setPlayerName = (name) => localStorage.setItem("player_name", name);
 const getPlayerName = () => localStorage.getItem("player_name");
 
-const showTime = (seconds) =>
-	new Date(seconds * 1000).toISOString().substr(11, 8);
+const showTime = (elapsedSeconds) => {
+	const hours = Math.floor(elapsedSeconds / 3600);
+	const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+	const remainder = elapsedSeconds % 60;
+	return [hours, minutes, remainder]
+		.map((part) => String(part).padStart(2, "0"))
+		.slice(hours > 0 ? 0 : 1)
+		.join(":");
+};
 
 const clearSudoku = () => {
-	for (let i = 0; i < Math.pow(CONSTANT.GRID_SIZE, 2); i++) {
-		cells[i].innerHTML = "";
-		cells[i].classList.remove("filled");
-		cells[i].classList.remove("selected");
-	}
+	cells.forEach((cell) => {
+		cell.textContent = "";
+		cell.removeAttribute("data-value");
+		cell.classList.remove("filled", "selected", "hover", "err", "cell-err");
+	});
+	selectedCell = -1;
+};
+
+const updateProgress = () => {
+	if (!playerGrid) return;
+	const fixedCells = sudoku.question.flat().filter((value) => value !== 0).length;
+	const enteredCells = playerGrid.flat().filter((value, index) => {
+		const row = Math.floor(index / CONSTANT.GRID_SIZE);
+		const col = index % CONSTANT.GRID_SIZE;
+		return sudoku.question[row][col] === 0 && value !== 0;
+	}).length;
+	const totalEmptyCells = CONSTANT.GRID_SIZE ** 2 - fixedCells;
+	progressValue.textContent = `${enteredCells} / ${totalEmptyCells}`;
+	progressBar.style.width = `${totalEmptyCells ? (enteredCells / totalEmptyCells) * 100 : 0}%`;
+};
+
+const updateCell = (index, value) => {
+	const row = Math.floor(index / CONSTANT.GRID_SIZE);
+	const col = index % CONSTANT.GRID_SIZE;
+	const cell = cells[index];
+	playerGrid[row][col] = value;
+	cell.textContent = value === 0 ? "" : String(value);
+	cell.dataset.value = String(value);
+	cell.classList.remove("err");
 };
 
 const initSudoku = () => {
 	clearSudoku();
-	resetBg();
-
-	su = sudokuGen(level);
-	su_answer = [...su.question];
-
+	sudoku = sudokuGen(level);
+	playerGrid = sudoku.question.map((row) => [...row]);
 	seconds = 0;
 
-	saveGameInfo();
-
-	for (let i = 0; i < Math.pow(CONSTANT.GRID_SIZE, 2); i++) {
-		let row = Math.floor(i / CONSTANT.GRID_SIZE);
-		let col = i % CONSTANT.GRID_SIZE;
-
-		cells[i].setAttribute("data-value", su.question[row][col]);
-
-		if (su.question[row][col] !== 0) {
-			cells[i].classList.add("filled");
-			cells[i].innerHTML = su.question[row][col];
+	cells.forEach((cell, index) => {
+		const row = Math.floor(index / CONSTANT.GRID_SIZE);
+		const col = index % CONSTANT.GRID_SIZE;
+		const value = sudoku.question[row][col];
+		if (value !== 0) {
+			cell.classList.add("filled");
+			cell.textContent = String(value);
+			cell.dataset.value = String(value);
 		}
-	}
+	});
+
+	removeErrors();
+	saveGameInfo();
+	updateProgress();
 };
 
 const loadSudoku = () => {
-	let game = getGameInfo();
+	const game = getGameInfo();
+	if (!game?.su?.question || !game.su.original) return false;
 
-	game_level.innerHTML = CONSTANT.LEVEL_NAME[game.level];
-
-	su = game.su;
-
-	su_answer = su.answer;
-
-	seconds = game.seconds;
-	game_time.innerHTML = showTime(seconds);
-
-	level_index = game.level;
-
-	for (let i = 0; i < Math.pow(CONSTANT.GRID_SIZE, 2); i++) {
-		let row = Math.floor(i / CONSTANT.GRID_SIZE);
-		let col = i % CONSTANT.GRID_SIZE;
-
-		cells[i].setAttribute("data-value", su_answer[row][col]);
-		cells[i].innerHTML = su_answer[row][col] !== 0 ? su_answer[row][col] : "";
-		if (su.question[row][col] !== 0) {
-			cells[i].classList.add("filled");
-		}
+	clearSudoku();
+	sudoku = game.su;
+	if (!sudokuCheck(sudoku.original)) {
+		const reconstructedSolution = sudoku.question.map((row) => [...row]);
+		if (!sudokuCreate(reconstructedSolution) || !sudokuCheck(reconstructedSolution)) return false;
+		sudoku.original = reconstructedSolution;
 	}
+	playerGrid = (game.su.answer || game.su.question).map((row) => [...row]);
+	seconds = game.seconds || 0;
+	levelIndex = game.level || 0;
+	level = CONSTANT.LEVEL[levelIndex];
+	gameLevel.textContent = CONSTANT.LEVEL_NAME[levelIndex];
+
+	cells.forEach((cell, index) => {
+		const row = Math.floor(index / CONSTANT.GRID_SIZE);
+		const col = index % CONSTANT.GRID_SIZE;
+		const value = playerGrid[row][col];
+		if (sudoku.question[row][col] !== 0) cell.classList.add("filled");
+		if (value !== 0) {
+			cell.textContent = String(value);
+			cell.dataset.value = String(value);
+		}
+	});
+
+	removeErrors();
+	updateProgress();
+	return true;
 };
 
-const hoverBg = (index) => {
-	let row = Math.floor(index / CONSTANT.GRID_SIZE);
-	let col = index % CONSTANT.GRID_SIZE;
+const clearHighlights = () => cells.forEach((cell) => cell.classList.remove("hover"));
 
-	let box_start_row = row - (row % 3);
-	let box_start_col = col - (col % 3);
+const highlightRelatedCells = (index) => {
+	const row = Math.floor(index / CONSTANT.GRID_SIZE);
+	const col = index % CONSTANT.GRID_SIZE;
+	const boxRow = row - (row % CONSTANT.BOX_SIZE);
+	const boxCol = col - (col % CONSTANT.BOX_SIZE);
 
-	for (let i = 0; i < CONSTANT.BOX_SIZE; i++) {
-		for (let j = 0; j < CONSTANT.BOX_SIZE; j++) {
-			let cell = cells[9 * (box_start_row + i) + (box_start_col + j)];
+	cells.forEach((cell, cellIndex) => {
+		const cellRow = Math.floor(cellIndex / CONSTANT.GRID_SIZE);
+		const cellCol = cellIndex % CONSTANT.GRID_SIZE;
+		if (
+			cellRow === row ||
+			cellCol === col ||
+			(Math.floor(cellRow / CONSTANT.BOX_SIZE) === boxRow / CONSTANT.BOX_SIZE &&
+				Math.floor(cellCol / CONSTANT.BOX_SIZE) === boxCol / CONSTANT.BOX_SIZE)
+		) {
 			cell.classList.add("hover");
 		}
-	}
-
-	let step = 9;
-	while (index - step >= 0) {
-		cells[index - step].classList.add("hover");
-		step += 9;
-	}
-
-	step = 9;
-	while (index + step < 81) {
-		cells[index + step].classList.add("hover");
-		step += 9;
-	}
-
-	step = 1;
-	while (index - step >= 9 * row) {
-		cells[index - step].classList.add("hover");
-		step += 1;
-	}
-
-	step = 1;
-	while (index + step < 9 * row + 9) {
-		cells[index + step].classList.add("hover");
-		step += 1;
-	}
+	});
 };
 
-const resetBg = () => {
-	cells.forEach((e) => e.classList.remove("hover"));
+const selectCell = (index) => {
+	if (index < 0 || index >= cells.length) return;
+	selectedCell = index;
+	cells.forEach((cell) => cell.classList.remove("selected"));
+	cells[index].classList.add("selected");
+	clearHighlights();
+	highlightRelatedCells(index);
 };
 
-const checkErr = (value) => {
-	const addErr = (cell) => {
-		if (parseInt(cell.getAttribute("data-value")) === value) {
+const removeErrors = () => cells.forEach((cell) => cell.classList.remove("err"));
+
+const markConflicts = (value) => {
+	if (selectedCell < 0 || value === 0) return;
+	const selectedRow = Math.floor(selectedCell / CONSTANT.GRID_SIZE);
+	const selectedCol = selectedCell % CONSTANT.GRID_SIZE;
+	const boxRow = selectedRow - (selectedRow % CONSTANT.BOX_SIZE);
+	const boxCol = selectedCol - (selectedCol % CONSTANT.BOX_SIZE);
+
+	cells.forEach((cell, index) => {
+		const row = Math.floor(index / CONSTANT.GRID_SIZE);
+		const col = index % CONSTANT.GRID_SIZE;
+		const inSameUnit =
+			row === selectedRow ||
+			col === selectedCol ||
+			(Math.floor(row / CONSTANT.BOX_SIZE) === boxRow / CONSTANT.BOX_SIZE &&
+				Math.floor(col / CONSTANT.BOX_SIZE) === boxCol / CONSTANT.BOX_SIZE);
+		if (index !== selectedCell && inSameUnit && playerGrid[row][col] === value) {
 			cell.classList.add("err");
-			cell.classList.add("cell-err");
-			setTimeout(() => {
-				cell.classList.remove("cell-err");
-			}, 500);
 		}
-	};
-
-	let index = selected_cell;
-
-	let row = Math.floor(index / CONSTANT.GRID_SIZE);
-	let col = index % CONSTANT.GRID_SIZE;
-
-	let box_start_row = row - (row % 3);
-	let box_start_col = col - (col % 3);
-
-	for (let i = 0; i < CONSTANT.BOX_SIZE; i++) {
-		for (let j = 0; j < CONSTANT.BOX_SIZE; j++) {
-			let cell = cells[9 * (box_start_row + i) + (box_start_col + j)];
-			if (!cell.classList.contains("selected")) addErr(cell);
-		}
-	}
-
-	let step = 9;
-	while (index - step >= 0) {
-		addErr(cells[index - step]);
-		step += 9;
-	}
-
-	step = 9;
-	while (index + step < 81) {
-		addErr(cells[index + step]);
-		step += 9;
-	}
-
-	step = 1;
-	while (index - step >= 9 * row) {
-		addErr(cells[index - step]);
-		step += 1;
-	}
-
-	step = 1;
-	while (index + step < 9 * row + 9) {
-		addErr(cells[index + step]);
-		step += 1;
-	}
+	});
 };
-
-const removeErr = () => cells.forEach((e) => e.classList.remove("err"));
 
 const saveGameInfo = () => {
-	let game = {
-		level: level_index,
-		seconds: seconds,
-		su: {
-			original: su.original,
-			question: su.question,
-			answer: su_answer,
-		},
-	};
-	localStorage.setItem("game", JSON.stringify(game));
+	if (!sudoku || !playerGrid) return;
+	localStorage.setItem(
+		"game",
+		JSON.stringify({
+			level: levelIndex,
+			seconds,
+			su: {
+				original: sudoku.original,
+				question: sudoku.question,
+				answer: playerGrid,
+			},
+		}),
+	);
 };
 
 const removeGameInfo = () => {
@@ -245,173 +202,176 @@ const removeGameInfo = () => {
 	document.querySelector("#btn-continue").style.display = "none";
 };
 
-const isGameWin = () => sudokuCheck(su_answer);
+const isGameWon = () => sudokuCheck(playerGrid);
 
 const showResult = () => {
 	clearInterval(timer);
-	result_screen.classList.add("active");
-	result_time.innerHTML = showTime(seconds);
+	timer = null;
+	resultScreen.classList.add("active");
+	resultTime.textContent = showTime(seconds);
 };
 
-const initNumberInputEvent = () => {
-	number_inputs.forEach((e, index) => {
-		e.addEventListener("click", () => {
-			if (!cells[selected_cell].classList.contains("filled")) {
-				cells[selected_cell].innerHTML = index + 1;
-				cells[selected_cell].setAttribute("data-value", index + 1);
-				let row = Math.floor(selected_cell / CONSTANT.GRID_SIZE);
-				let col = selected_cell % CONSTANT.GRID_SIZE;
-				su_answer[row][col] = index + 1;
+const enterNumber = (value) => {
+	if (selectedCell < 0 || isCellFilled(cells[selectedCell]) || paused) return;
+	updateCell(selectedCell, value);
+	removeErrors();
+	const row = Math.floor(selectedCell / CONSTANT.GRID_SIZE);
+	const col = selectedCell % CONSTANT.GRID_SIZE;
+	if (sudoku.original[row][col] !== value) {
+		cells[selectedCell].classList.add("err");
+		markConflicts(value);
+	}
 
-				saveGameInfo();
+	cells[selectedCell].classList.remove("zoom-in");
+	void cells[selectedCell].offsetWidth;
+	cells[selectedCell].classList.add("zoom-in");
+	window.setTimeout(() => cells[selectedCell]?.classList.remove("zoom-in"), 220);
 
-				removeErr();
-				checkErr(index + 1);
-				cells[selected_cell].classList.add("zoom-in");
-				setTimeout(() => {
-					cells[selected_cell].classList.remove("zoom-in");
-				}, 500);
-
-				if (isGameWin()) {
-					removeGameInfo();
-					showResult();
-				}
-			}
-		});
-	});
+	saveGameInfo();
+	updateProgress();
+	if (isGameWon()) {
+		removeGameInfo();
+		showResult();
+	}
 };
 
-const initCellsEvent = () => {
-	cells.forEach((e, index) => {
-		e.addEventListener("click", () => {
-			if (!e.classList.contains("filled")) {
-				cells.forEach((e) => e.classList.remove("selected"));
-
-				selected_cell = index;
-				e.classList.remove("err");
-				e.classList.add("selected");
-				resetBg();
-				hoverBg(index);
-			}
-		});
-	});
+const eraseSelectedCell = () => {
+	if (selectedCell < 0 || isCellFilled(cells[selectedCell]) || paused) return;
+	updateCell(selectedCell, 0);
+	removeErrors();
+	saveGameInfo();
+	updateProgress();
 };
 
 const startGame = () => {
-	start_screen.classList.remove("active");
-	game_screen.classList.add("active");
-
-	player_name.innerHTML = name_input.value.trim();
-	setPlayerName(name_input.value.trim());
-
-	game_level.innerHTML = CONSTANT.LEVEL_NAME[level_index];
-
-	showTime(seconds);
-
+	startScreen.classList.remove("active");
+	gameScreen.classList.add("active");
+	pauseScreen.classList.remove("active");
+	resultScreen.classList.remove("active");
+	window.scrollTo({ top: 0, behavior: "smooth" });
+	paused = false;
+	playerName.textContent = nameInput.value.trim();
+	setPlayerName(nameInput.value.trim());
+	gameLevel.textContent = CONSTANT.LEVEL_NAME[levelIndex];
+	gameTime.textContent = showTime(seconds);
+	saveGameInfo();
+	clearInterval(timer);
 	timer = setInterval(() => {
-		if (!pause) {
-			seconds = seconds + 1;
-			game_time.innerHTML = showTime(seconds);
+		if (!paused) {
+			seconds += 1;
+			gameTime.textContent = showTime(seconds);
+			saveGameInfo();
 		}
 	}, 1000);
 };
 
 const returnStartScreen = () => {
 	clearInterval(timer);
-	pause = false;
-	seconds = 0;
-	start_screen.classList.add("active");
-	game_screen.classList.remove("active");
-	pause_screen.classList.remove("active");
-	result_screen.classList.remove("active");
+	timer = null;
+	paused = false;
+	window.scrollTo({ top: 0, behavior: "smooth" });
+	document.querySelector("#btn-continue").style.display = getGameInfo() ? "flex" : "none";
+	startScreen.classList.add("active");
+	gameScreen.classList.remove("active");
+	pauseScreen.classList.remove("active");
+	resultScreen.classList.remove("active");
 };
 
-document.querySelector("#btn-level").addEventListener("click", (e) => {
-	level_index =
-		level_index + 1 > CONSTANT.LEVEL.length - 1 ? 0 : level_index + 1;
-	level = CONSTANT.LEVEL[level_index];
-	e.target.innerHTML = CONSTANT.LEVEL_NAME[level_index];
+const requirePlayerName = () => {
+	if (nameInput.value.trim()) return true;
+	nameInput.classList.add("input-err");
+	window.setTimeout(() => {
+		nameInput.classList.remove("input-err");
+		nameInput.focus();
+	}, 350);
+	return false;
+};
+
+document.querySelector("#dark-mode-toggle").addEventListener("click", () => {
+	document.body.classList.toggle("dark");
+	const isDark = document.body.classList.contains("dark");
+	localStorage.setItem("darkmode", String(isDark));
+	document.querySelector('meta[name="theme-color"]').content = isDark ? "#171d1a" : "#f5f4f0";
+});
+
+document.querySelector("#btn-level").addEventListener("click", (event) => {
+	levelIndex = (levelIndex + 1) % CONSTANT.LEVEL.length;
+	level = CONSTANT.LEVEL[levelIndex];
+	event.currentTarget.firstChild.textContent = `${CONSTANT.LEVEL_NAME[levelIndex]} `;
 });
 
 document.querySelector("#btn-play").addEventListener("click", () => {
-	if (name_input.value.trim().length > 0) {
-		initSudoku();
-		startGame();
-	} else {
-		name_input.classList.add("input-err");
-		setTimeout(() => {
-			name_input.classList.remove("input-err");
-			name_input.focus();
-		}, 500);
-	}
+	if (!requirePlayerName()) return;
+	initSudoku();
+	startGame();
 });
 
 document.querySelector("#btn-continue").addEventListener("click", () => {
-	if (name_input.value.trim().length > 0) {
-		loadSudoku();
-		startGame();
-	} else {
-		name_input.classList.add("input-err");
-		setTimeout(() => {
-			name_input.classList.remove("input-err");
-			name_input.focus();
-		}, 500);
-	}
+	if (!requirePlayerName()) return;
+	if (loadSudoku()) startGame();
 });
 
 document.querySelector("#btn-pause").addEventListener("click", () => {
-	pause_screen.classList.add("active");
-	pause = true;
+	pauseScreen.classList.add("active");
+	paused = true;
 });
 
 document.querySelector("#btn-resume").addEventListener("click", () => {
-	pause_screen.classList.remove("active");
-	pause = false;
+	pauseScreen.classList.remove("active");
+	paused = false;
 });
 
-document.querySelector("#btn-new-game").addEventListener("click", () => {
-	returnStartScreen();
+document.querySelector("#btn-new-game").addEventListener("click", returnStartScreen);
+document.querySelector("#btn-new-game-2").addEventListener("click", returnStartScreen);
+document.querySelector("#btn-home").addEventListener("click", returnStartScreen);
+document.querySelector("#btn-delete").addEventListener("click", eraseSelectedCell);
+
+numberInputs.forEach((button) => {
+	button.addEventListener("click", () => enterNumber(Number(button.textContent)));
 });
 
-document.querySelector("#btn-new-game-2").addEventListener("click", () => {
-	console.log("object");
-	returnStartScreen();
+cells.forEach((cell, index) => {
+	cell.addEventListener("click", () => selectCell(index));
+	cell.addEventListener("keydown", (event) => {
+		if (event.key >= "1" && event.key <= "9") {
+			event.preventDefault();
+			event.stopPropagation();
+			selectCell(index);
+			enterNumber(Number(event.key));
+		}
+	});
 });
 
-document.querySelector("#btn-delete").addEventListener("click", () => {
-	cells[selected_cell].innerHTML = "";
-	cells[selected_cell].setAttribute("data-value", 0);
-
-	let row = Math.floor(selected_cell / CONSTANT.GRID_SIZE);
-	let col = selected_cell % CONSTANT.GRID_SIZE;
-
-	su_answer[row][col] = 0;
-
-	removeErr();
+document.addEventListener("keydown", (event) => {
+	if (!gameScreen.classList.contains("active")) return;
+	if (event.target === nameInput || event.target.matches("button")) return;
+	if (event.key >= "1" && event.key <= "9") {
+		event.preventDefault();
+		enterNumber(Number(event.key));
+	} else if (event.key === "Backspace" || event.key === "Delete") {
+		eraseSelectedCell();
+	} else if (event.key === "Escape") {
+		pauseScreen.classList.add("active");
+		paused = true;
+	} else if (selectedCell >= 0 && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+		event.preventDefault();
+		const offsets = { ArrowUp: -9, ArrowDown: 9, ArrowLeft: -1, ArrowRight: 1 };
+		let nextCell = selectedCell + offsets[event.key];
+		if (event.key === "ArrowLeft" && selectedCell % 9 === 0) nextCell = selectedCell;
+		if (event.key === "ArrowRight" && selectedCell % 9 === 8) nextCell = selectedCell;
+		selectCell(Math.max(0, Math.min(80, nextCell)));
+		cells[selectedCell].focus();
+	}
 });
 
 const init = () => {
-	const darkmode = JSON.parse(localStorage.getItem("darkmode"));
-	document.body.classList.add(darkmode ? "dark" : "light");
-	document
-		.querySelector('meta[name="theme-color"')
-		.setAttribute("content", darkmode ? "#1a1a27" : "#fff");
-
+	const isDark = localStorage.getItem("darkmode") === "true";
+	document.body.classList.toggle("dark", isDark);
+	document.querySelector('meta[name="theme-color"]').content = isDark ? "#171d1a" : "#f5f4f0";
 	const game = getGameInfo();
-
-	document.querySelector("#btn-continue").style.display = game
-		? "grid"
-		: "none";
-
-	initGameGrid();
-	initCellsEvent();
-	initNumberInputEvent();
-
-	if (getPlayerName()) {
-		name_input.value = getPlayerName();
-	} else {
-		name_input.focus();
-	}
+	document.querySelector("#btn-continue").style.display = game ? "flex" : "none";
+	if (getPlayerName()) nameInput.value = getPlayerName();
+	else nameInput.focus();
 };
 
 init();

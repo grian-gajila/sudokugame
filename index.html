@@ -2,188 +2,193 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="theme-color" content="#fff" />
-		<title>Sudoku Game</title>
-		<link rel="icon" type="image/jpg" href="./static/images/CpeDev.png" />
-		<link
-			href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-			rel="stylesheet"
+		<meta name="theme-color" content="#f5f4f0" />
+		<meta
+			name="description"
+			content="A calmer, more considered place to play Sudoku. Pick up a puzzle and find your focus."
 		/>
+		<title>Sudoku — a little more focus</title>
+		<link rel="icon" type="image/png" href="./static/images/CpeDev.png" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;1,900&display=swap"
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
 			rel="stylesheet"
 		/>
 		<link rel="stylesheet" href="./static/design/styles.css" />
 	</head>
 	<body>
-		<nav>
+		<nav class="topbar" aria-label="Main navigation">
 			<div class="nav-container">
-				<a href="#" class="nav-logo text"
-					>Sudoku<span class="robot">🤖</span
-					><span class="logoclass">CpeDev</span></a
-				>
-				<div class="dark-mode-toggle" id="dark-mode-toggle">
-					<i class="bx bxs-sun"></i>
-					<i class="bx bxs-moon"></i>
+				<a href="#" class="nav-logo" aria-label="Sudoku home">
+					<span class="brand-mark" aria-hidden="true">s.</span>
+					<span>good <strong>number</strong></span>
+				</a>
+				<div class="nav-right">
+					<span class="nav-caption">A little more focus.</span>
+					<button
+						class="dark-mode-toggle"
+						id="dark-mode-toggle"
+						type="button"
+						aria-label="Toggle dark mode"
+						title="Toggle dark mode"
+					>
+						<span class="theme-icon theme-sun" aria-hidden="true">☼</span>
+						<span class="theme-icon theme-moon" aria-hidden="true">◐</span>
+					</button>
 				</div>
 			</div>
 		</nav>
 
-		<div class="main">
+		<main class="main">
 			<div class="screen">
-				<div class="start-screen active" id="start-screen">
-					<input
-						type="text"
-						placeholder="Your name"
-						maxlength="8"
-						class="input-name"
-						id="input-name"
-					/>
-					<div class="btn" id="btn-level">Easy</div>
-					<div class="btn" id="btn-continue">Continue</div>
-					<div class="btn btn-blue" id="btn-play">New game</div>
-				</div>
+				<section class="start-screen active" id="start-screen" aria-labelledby="welcome-title">
+					<div class="welcome-copy">
+						<p class="eyebrow"><span class="eyebrow-dot"></span> YOUR DAILY RESET</p>
+						<h1 id="welcome-title">Make room<br />for <em>one good</em><br />puzzle.</h1>
+						<p class="welcome-description">
+							A few quiet minutes. A little pattern-finding. Your next favourite
+							break starts here.
+						</p>
+						<div class="start-form">
+							<label class="field-label" for="input-name">YOUR NAME</label>
+							<input
+								type="text"
+								placeholder="What should we call you?"
+								maxlength="24"
+								autocomplete="name"
+								class="input-name"
+								id="input-name"
+							/>
+							<div class="setup-row">
+								<div class="setup-copy">
+									<span class="field-label">PUZZLE LEVEL</span>
+									<span class="setup-hint">Choose your pace</span>
+								</div>
+								<button class="level-select" id="btn-level" type="button">
+									Easy <span aria-hidden="true">⌄</span>
+								</button>
+							</div>
+							<button class="btn btn-blue" id="btn-play" type="button">
+								Start a new game <span aria-hidden="true">↗</span>
+							</button>
+							<button class="btn btn-continue" id="btn-continue" type="button">
+								Continue your game <span aria-hidden="true">→</span>
+							</button>
+						</div>
+						<p class="welcome-note">No streaks. No rush. Just you and the grid.</p>
+					</div>
+					<div class="welcome-art" aria-hidden="true">
+						<div class="art-orbit orbit-one"></div>
+						<div class="art-orbit orbit-two"></div>
+						<div class="art-card">
+							<div class="art-card-top"><span>PUZZLE NO. 001</span><span>✳</span></div>
+							<div class="art-grid">
+								<span>4</span><span></span><span>8</span><span></span><span>2</span><span></span><span>1</span><span></span><span>6</span>
+								<span></span><span>7</span><span></span><span>6</span><span></span><span>1</span><span></span><span>8</span><span></span>
+								<span>1</span><span></span><span>6</span><span></span><span>8</span><span></span><span>3</span><span></span><span>5</span>
+								<span></span><span>5</span><span></span><span>8</span><span></span><span>4</span><span></span><span>3</span><span></span>
+								<span>8</span><span></span><span>4</span><span></span><span class="art-highlight">6</span><span></span><span>7</span><span></span><span>2</span>
+								<span></span><span>3</span><span></span><span>2</span><span></span><span>7</span><span></span><span>1</span><span></span>
+								<span>9</span><span></span><span>1</span><span></span><span>7</span><span></span><span>5</span><span></span><span>3</span>
+								<span></span><span>6</span><span></span><span>4</span><span></span><span>8</span><span></span><span>2</span><span></span>
+								<span>3</span><span></span><span>5</span><span></span><span>1</span><span></span><span>4</span><span></span><span>8</span>
+							</div>
+							<div class="art-card-bottom"><span>TAKE YOUR TIME</span><span>09:42</span></div>
+						</div>
+						<div class="art-stamp"><span>THE<br />QUIET<br />WIN</span><b>✳</b></div>
+						<p class="art-caption">A small ritual<br />for a clearer mind.</p>
+					</div>
+				</section>
 
-				<div class="main-game" id="game-screen">
-					<div class="main-sudoku-grid">
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-						<div class="main-grid-cell"></div>
-					</div>
-					<div class="main-game-info">
-						<div class="main-game-info-box main-game-info-name">
-							<span id="player-name"></span>
+				<section class="main-game" id="game-screen" aria-label="Sudoku game">
+					<header class="game-heading">
+						<div>
+							<p class="eyebrow"><span class="eyebrow-dot"></span> YOUR FOCUS SESSION</p>
+							<h1>Find your <em>flow.</em></h1>
 						</div>
-						<div class="main-game-info-box main-game-info-level">
-							<span id="game-level">Easy</span>
+						<button class="back-button" id="btn-home" type="button" aria-label="Back to home">↗</button>
+					</header>
+					<div class="game-layout">
+						<div class="board-column">
+							<div class="board-topline">
+								<div>
+									<span class="board-label">PUZZLE</span>
+									<span class="board-number">No. 001</span>
+								</div>
+								<span class="live-pill"><span></span> IN PROGRESS</span>
+							</div>
+							<div class="board-stage">
+								<div class="main-sudoku-grid" role="grid" aria-label="Sudoku puzzle">
+									<div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div>
+									<div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div>
+									<div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div>
+									<div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div>
+									<div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div>
+									<div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div>
+									<div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div>
+									<div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div>
+									<div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div><div class="main-grid-cell" role="gridcell" tabindex="0"></div>
+								</div>
+							</div>
+							<div class="main-game-info">
+								<div class="main-game-info-box">
+									<span class="info-label">PLAYER</span><span id="player-name">Player</span>
+								</div>
+								<div class="main-game-info-box">
+									<span class="info-label">DIFFICULTY</span><span id="game-level">Easy</span>
+								</div>
+							</div>
 						</div>
+						<aside class="game-sidebar">
+							<div class="session-card">
+								<span class="field-label">TIME ELAPSED</span>
+								<div class="timer-row"><span id="game-time">00:00</span><button class="pause-btn" id="btn-pause" type="button" aria-label="Pause game">Ⅱ</button></div>
+								<div class="progress-label"><span>PUZZLE PROGRESS</span><span id="progress-value">0 / 81</span></div>
+								<div class="progress-track"><span id="progress-bar"></span></div>
+							</div>
+							<div class="number-panel">
+								<div class="panel-heading"><span class="field-label">NUMBER PAD</span><span>1 — 9</span></div>
+								<div class="numbers">
+									<button class="number" type="button">1</button><button class="number" type="button">2</button><button class="number" type="button">3</button>
+									<button class="number" type="button">4</button><button class="number" type="button">5</button><button class="number" type="button">6</button>
+									<button class="number" type="button">7</button><button class="number" type="button">8</button><button class="number" type="button">9</button>
+								</div>
+								<button class="delete" id="btn-delete" type="button"><span aria-hidden="true">⌫</span> Erase</button>
+								<p class="keyboard-hint">TIP <span>Use your keyboard to enter numbers</span></p>
+							</div>
+							<div class="sidebar-quote"><span aria-hidden="true">✳</span><p>One square at a time.<br /><em>You’re doing just fine.</em></p></div>
+						</aside>
 					</div>
-					<div class="main-game-info-box main-game-info-time">
-						<span id="game-time">10:20</span>
-						<div class="pause-btn" id="btn-pause">
-							<i class="bx bx-pause"></i>
-						</div>
+				</section>
+
+				<section class="pause-screen overlay-screen" id="pause-screen" aria-label="Game paused">
+					<div class="overlay-card">
+						<span class="overlay-icon">Ⅱ</span>
+						<p class="eyebrow">TAKE YOUR TIME</p>
+						<h2>Pause &amp; breathe.</h2>
+						<p>Your puzzle will be right here when you’re ready.</p>
+						<button class="btn btn-blue" id="btn-resume" type="button">Back to puzzle <span>→</span></button>
+						<button class="text-button" id="btn-new-game" type="button">Leave this puzzle</button>
 					</div>
-					<div class="numbers">
-						<div class="number">1</div>
-						<div class="number">2</div>
-						<div class="number">3</div>
-						<div class="number">4</div>
-						<div class="number">5</div>
-						<div class="number">6</div>
-						<div class="number">7</div>
-						<div class="number">8</div>
-						<div class="number">9</div>
-						<div class="delete" id="btn-delete">&#8998;</div>
+				</section>
+				<section class="result-screen overlay-screen" id="result-screen" aria-label="Puzzle complete">
+					<div class="overlay-card">
+						<span class="overlay-icon result-icon">✳</span>
+						<p class="eyebrow">A MOMENT WELL SPENT</p>
+						<h2 class="congrate">Nicely done.</h2>
+						<p>You found every number. Take that feeling with you.</p>
+						<div class="result-stat"><span>YOUR TIME</span><strong id="result-time">00:00</strong></div>
+						<button class="btn btn-blue" id="btn-new-game-2" type="button">Play another <span>↗</span></button>
 					</div>
-				</div>
-				<div class="pause-screen" id="pause-screen">
-					<div class="btn btn-blue" id="btn-resume">Resume</div>
-					<div class="btn" id="btn-new-game">New game</div>
-				</div>
-				<div class="result-screen" id="result-screen">
-					<div class="congrate">Competed</div>
-					<div class="info">Time</div>
-					<div id="result-time"></div>
-					<div class="btn" id="btn-new-game-2">New game</div>
-				</div>
+				</section>
 			</div>
-		</div>
+		</main>
+		<footer class="site-footer"><span>GOOD NUMBER</span><span>MADE FOR A MOMENT OF CALM <b>✳</b></span></footer>
 
 		<script src="./static/js/constant.js"></script>
 		<script src="./static/js/sudoku.js"></script>
 		<script src="./static/js/app.js"></script>
 	</body>
-
-	<footer>
-		<div class="main-copyright">
-			<a class="copyright" href="https://github.com/cpe-prog"
-				><span class="footer">&copy; </span>CpeDev<span class="footer footerbot"
-					>🤖</span
-				></a
-			>
-		</div>
-	</footer>
 </html>
