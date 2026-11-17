@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="theme-color" content="#f5f4f0" />
+		<meta
+			name="description"
+			content="Play a focused game of Sudoku."
+		/>
+		<title>Sudoku — your focus session</title>
+		<link rel="icon" type="image/png" href="./static/images/CpeDev.png" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="./static/design/styles.css" />
+	</head>
+	<body>
+		<nav class="topbar" aria-label="Main navigation">
+			<div class="nav-container">
+				<a href="./index.html" class="nav-logo" aria-label="Sudoku home">
+					<span class="brand-mark" aria-hidden="true">s.</span>
+					<span>good <strong>number</strong></span>
+				</a>
+				<div class="nav-right">
+					<span class="nav-caption">A little more focus.</span>
+					<button
+						class="dark-mode-toggle"
+						id="dark-mode-toggle"
+						type="button"
+						aria-label="Toggle dark mode"
+						title="Toggle dark mode"
+					>
+						<span class="theme-icon theme-sun" aria-hidden="true">☼</span>
+						<span class="theme-icon theme-moon" aria-hidden="true">◐</span>
+					</button>
+				</div>
+			</div>
+		</nav>
+
+		<main class="main">
+			<div class="screen">
+				<section class="main-game active" id="game-screen" aria-label="Sudoku game">
+					<header class="game-heading">
+						<div>
+							<p class="eyebrow"><span class="eyebrow-dot"></span> YOUR FOCUS SESSION</p>
+							<h1>Find your <em>flow.</em></h1>
+						</div>
+						<button class="back-button" id="btn-home" type="button" aria-label="Back to home">↗</button>
+					</header>
+					<div class="game-layout">
+						<div class="board-column">
+							<div class="board-topline">
+								<div>
+									<span class="board-label">PUZZLE</span>
+									<span class="board-number">No. 001</span>
+								</div>
+								<span class="live-pill"><span></span> IN PROGRESS</span>
+							</div>
+							<div class="board-stage">
+								<div class="main-sudoku-grid" role="grid" aria-label="Sudoku puzzle"></div>
+							</div>
+							<div class="main-game-info">
+								<div class="main-game-info-box">
+									<span class="info-label">PLAYER</span><span id="player-name">Player</span>
+								</div>
+								<div class="main-game-info-box">
+									<span class="info-label">DIFFICULTY</span><span id="game-level">Easy</span>
+								</div>
+							</div>
+						</div>
+						<aside class="game-sidebar">
+							<div class="session-card">
+								<span class="field-label">TIME ELAPSED</span>
+								<div class="timer-row"><span id="game-time">00:00</span><button class="pause-btn" id="btn-pause" type="button" aria-label="Pause game">Ⅱ</button></div>
+								<div class="progress-label"><span>PUZZLE PROGRESS</span><span id="progress-value">0 / 81</span></div>
+								<div class="progress-track"><span id="progress-bar"></span></div>
+							</div>
+							<div class="number-panel">
+								<div class="panel-heading"><span class="field-label">NUMBER PAD</span><span>1 — 9</span></div>
+								<div class="numbers">
+									<button class="number" type="button">1</button><button class="number" type="button">2</button><button class="number" type="button">3</button>
+									<button class="number" type="button">4</button><button class="number" type="button">5</button><button class="number" type="button">6</button>
+									<button class="number" type="button">7</button><button class="number" type="button">8</button><button class="number" type="button">9</button>
+								</div>
+								<button class="delete" id="btn-delete" type="button"><span aria-hidden="true">⌫</span> Erase</button>
+								<p class="keyboard-hint">TIP <span>Use your keyboard to enter numbers</span></p>
+							</div>
+							<div class="sidebar-quote"><span aria-hidden="true">✳</span><p>One square at a time.<br /><em>You’re doing just fine.</em></p></div>
+						</aside>
+					</div>
+				</section>
+
+				<section class="pause-screen overlay-screen" id="pause-screen" aria-label="Game paused">
+					<div class="overlay-card">
+						<span class="overlay-icon">Ⅱ</span>
+						<p class="eyebrow">TAKE YOUR TIME</p>
+						<h2>Pause &amp; breathe.</h2>
+						<p>Your puzzle will be right here when you’re ready.</p>
+						<button class="btn btn-blue" id="btn-resume" type="button">Back to puzzle <span>→</span></button>
+						<button class="text-button" id="btn-new-game" type="button">Leave this puzzle</button>
+					</div>
+				</section>
+				<section class="result-screen overlay-screen" id="result-screen" aria-label="Puzzle complete">
+					<div class="overlay-card">
+						<span class="overlay-icon result-icon">✳</span>
+						<p class="eyebrow">A MOMENT WELL SPENT</p>
+						<h2 class="congrate">Nicely done.</h2>
+						<p>You found every number. Take that feeling with you.</p>
+						<div class="result-stat"><span>YOUR TIME</span><strong id="result-time">00:00</strong></div>
+						<button class="btn btn-blue" id="btn-new-game-2" type="button">Play another <span>↗</span></button>
+					</div>
+				</section>
+			</div>
+		</main>
+		<footer class="site-footer"><span>GOOD NUMBER</span><span>MADE FOR A MOMENT OF CALM <b>✳</b></span></footer>
+
+		<script src="./static/js/constant.js"></script>
+		<script src="./static/js/sudoku.js"></script>
+		<script src="./static/js/app.js"></script>
+	</body>
+</html>

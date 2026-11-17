@@ -74,9 +74,11 @@ a {
 }
 
 .topbar {
-	position: relative;
+	position: sticky;
+	top: 0;
 	z-index: 5;
 	height: var(--nav-size);
+	background: var(--paper);
 }
 
 .nav-container {
@@ -506,6 +508,8 @@ a {
 }
 
 .main-game.active {
+	position: relative;
+	inset: auto;
 	opacity: 1;
 	visibility: visible;
 	transform: translateY(0);
@@ -979,7 +983,8 @@ a {
 
 .site-footer {
 	width: min(1180px, calc(100% - 64px));
-	min-height: 54px;
+	height: 54px;
+	flex-shrink: 0;
 	margin: auto;
 	display: flex;
 	align-items: center;
@@ -988,6 +993,7 @@ a {
 	color: var(--muted);
 	font-size: 8px;
 	letter-spacing: .12em;
+	white-space: nowrap;
 }
 
 .site-footer b {

@@ -4,7 +4,7 @@ A calm, responsive Sudoku game built with plain HTML, CSS, and JavaScript. It is
 
 ## Play locally
 
-Open `index.html` in a modern browser. The game uses browser local storage to remember your name, theme, current puzzle, and elapsed time.
+Open `index.html` in a modern browser to choose a puzzle and start or continue a game. The game page is `game.html`. Browser local storage remembers your name, theme, current puzzle, and elapsed time.
 
 ## Features
 
@@ -27,8 +27,10 @@ Open `index.html` in a modern browser. The game uses browser local storage to re
 
 ```text
 index.html
+game.html
 static/
   design/styles.css
+  js/home.js
   js/app.js
   js/constant.js
   js/sudoku.js

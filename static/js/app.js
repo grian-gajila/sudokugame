@@ -1,9 +1,15 @@
-const startScreen = document.querySelector("#start-screen");
 const gameScreen = document.querySelector("#game-screen");
 const pauseScreen = document.querySelector("#pause-screen");
 const resultScreen = document.querySelector("#result-screen");
+const grid = document.querySelector(".main-sudoku-grid");
+for (let index = 0; index < CONSTANT.GRID_SIZE ** 2; index += 1) {
+	const cell = document.createElement("div");
+	cell.className = "main-grid-cell";
+	cell.setAttribute("role", "gridcell");
+	cell.tabIndex = 0;
+	grid.append(cell);
+}
 const cells = [...document.querySelectorAll(".main-grid-cell")];
-const nameInput = document.querySelector("#input-name");
 const numberInputs = [...document.querySelectorAll(".number")];
 const playerName = document.querySelector("#player-name");
 const gameLevel = document.querySelector("#game-level");
@@ -27,7 +33,6 @@ const getGameInfo = () => {
 	return savedGame ? JSON.parse(savedGame) : null;
 };
 
-const setPlayerName = (name) => localStorage.setItem("player_name", name);
 const getPlayerName = () => localStorage.getItem("player_name");
 
 const showTime = (elapsedSeconds) => {
@@ -199,7 +204,6 @@ const saveGameInfo = () => {
 
 const removeGameInfo = () => {
 	localStorage.removeItem("game");
-	document.querySelector("#btn-continue").style.display = "none";
 };
 
 const isGameWon = () => sudokuCheck(playerGrid);
@@ -244,14 +248,12 @@ const eraseSelectedCell = () => {
 };
 
 const startGame = () => {
-	startScreen.classList.remove("active");
 	gameScreen.classList.add("active");
 	pauseScreen.classList.remove("active");
 	resultScreen.classList.remove("active");
 	window.scrollTo({ top: 0, behavior: "smooth" });
 	paused = false;
-	playerName.textContent = nameInput.value.trim();
-	setPlayerName(nameInput.value.trim());
+	playerName.textContent = getPlayerName() || "Player";
 	gameLevel.textContent = CONSTANT.LEVEL_NAME[levelIndex];
 	gameTime.textContent = showTime(seconds);
 	saveGameInfo();
@@ -265,50 +267,11 @@ const startGame = () => {
 	}, 1000);
 };
 
-const returnStartScreen = () => {
-	clearInterval(timer);
-	timer = null;
-	paused = false;
-	window.scrollTo({ top: 0, behavior: "smooth" });
-	document.querySelector("#btn-continue").style.display = getGameInfo() ? "flex" : "none";
-	startScreen.classList.add("active");
-	gameScreen.classList.remove("active");
-	pauseScreen.classList.remove("active");
-	resultScreen.classList.remove("active");
-};
-
-const requirePlayerName = () => {
-	if (nameInput.value.trim()) return true;
-	nameInput.classList.add("input-err");
-	window.setTimeout(() => {
-		nameInput.classList.remove("input-err");
-		nameInput.focus();
-	}, 350);
-	return false;
-};
-
 document.querySelector("#dark-mode-toggle").addEventListener("click", () => {
 	document.body.classList.toggle("dark");
 	const isDark = document.body.classList.contains("dark");
 	localStorage.setItem("darkmode", String(isDark));
 	document.querySelector('meta[name="theme-color"]').content = isDark ? "#171d1a" : "#f5f4f0";
-});
-
-document.querySelector("#btn-level").addEventListener("click", (event) => {
-	levelIndex = (levelIndex + 1) % CONSTANT.LEVEL.length;
-	level = CONSTANT.LEVEL[levelIndex];
-	event.currentTarget.firstChild.textContent = `${CONSTANT.LEVEL_NAME[levelIndex]} `;
-});
-
-document.querySelector("#btn-play").addEventListener("click", () => {
-	if (!requirePlayerName()) return;
-	initSudoku();
-	startGame();
-});
-
-document.querySelector("#btn-continue").addEventListener("click", () => {
-	if (!requirePlayerName()) return;
-	if (loadSudoku()) startGame();
 });
 
 document.querySelector("#btn-pause").addEventListener("click", () => {
@@ -321,9 +284,15 @@ document.querySelector("#btn-resume").addEventListener("click", () => {
 	paused = false;
 });
 
-document.querySelector("#btn-new-game").addEventListener("click", returnStartScreen);
-document.querySelector("#btn-new-game-2").addEventListener("click", returnStartScreen);
-document.querySelector("#btn-home").addEventListener("click", returnStartScreen);
+document.querySelector("#btn-new-game").addEventListener("click", () => {
+	window.location.href = "./index.html";
+});
+document.querySelector("#btn-new-game-2").addEventListener("click", () => {
+	window.location.href = "./index.html";
+});
+document.querySelector("#btn-home").addEventListener("click", () => {
+	window.location.href = "./index.html";
+});
 document.querySelector("#btn-delete").addEventListener("click", eraseSelectedCell);
 
 numberInputs.forEach((button) => {
@@ -344,7 +313,7 @@ cells.forEach((cell, index) => {
 
 document.addEventListener("keydown", (event) => {
 	if (!gameScreen.classList.contains("active")) return;
-	if (event.target === nameInput || event.target.matches("button")) return;
+	if (event.target.matches("button")) return;
 	if (event.key >= "1" && event.key <= "9") {
 		event.preventDefault();
 		enterNumber(Number(event.key));
@@ -368,10 +337,23 @@ const init = () => {
 	const isDark = localStorage.getItem("darkmode") === "true";
 	document.body.classList.toggle("dark", isDark);
 	document.querySelector('meta[name="theme-color"]').content = isDark ? "#171d1a" : "#f5f4f0";
-	const game = getGameInfo();
-	document.querySelector("#btn-continue").style.display = game ? "flex" : "none";
-	if (getPlayerName()) nameInput.value = getPlayerName();
-	else nameInput.focus();
+	playerName.textContent = getPlayerName() || "Player";
+
+	const params = new URLSearchParams(window.location.search);
+	if (params.get("new") === "1") {
+		const requestedLevel = Number(params.get("level"));
+		levelIndex = Number.isInteger(requestedLevel) && requestedLevel >= 0 && requestedLevel < CONSTANT.LEVEL.length
+			? requestedLevel
+			: 0;
+		level = CONSTANT.LEVEL[levelIndex];
+		initSudoku();
+		window.history.replaceState(null, "", window.location.pathname);
+	} else if (!loadSudoku()) {
+		window.location.replace("./index.html");
+		return;
+	}
+
+	startGame();
 };
 
 init();
